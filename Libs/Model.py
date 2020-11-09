@@ -2,6 +2,7 @@ import torch
 import torchvision
 import torch.nn as nn
 import torchvision.models as models
+import skimage.io as io
 
 
 class Net(nn.Module):
@@ -14,7 +15,14 @@ class Net(nn.Module):
         # print(self.model)
         ## Replace the last fully connected layer
         self.model.fc = nn.Linear(self.model.fc.in_features, n_class)
-        self.model.to(self.device)
 
     def forward(self, x):
         return self.model(x)
+
+    def predict(self, x):
+        self.eval()
+        with torch.no_grad():
+            output = self.model(x)
+            rv = torch.argmax(output, 1)
+        self.train()
+        return rv
