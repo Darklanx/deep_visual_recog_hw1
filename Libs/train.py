@@ -5,6 +5,7 @@ reference: https://www.kaggle.com/deepbear/pytorch-car-classifier-90-accuracy?se
 import time
 import torch
 import traceback
+import os
 
 
 def train_model(model,
@@ -13,31 +14,40 @@ def train_model(model,
                 criterion,
                 optimizer,
                 scheduler,
-                n_epochs=5):
+                start_epoch,
+                end_epoch=5):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     losses = []
     accuracies = []
     test_accuracies = []
     # set the model to train mode initially
     model.train()
-    for epoch in range(n_epochs):
+    for epoch in range(start_epoch, end_epoch):
+        model.train()
         print("Training epoch {} ...".format(epoch + 1))
         since = time.time()
         running_loss = 0.0
         running_correct = 0.0
         for i, data in enumerate(train_loader, 0):
+            if i % 30 == 0:
+                print(i)
 
             # get the inputs and assign them to cuda
             inputs, labels = data
             # print(i)
             # print(inputs.shape)
             #inputs = inputs.to(device).half() # uncomment for half precision model
-            inputs = inputs.to(model.device)
-            labels = labels.to(model.device)
+
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
             optimizer.zero_grad()
 
             # forward + backward + optimize
             outputs = model(inputs)
+            # print("\nOutside: input size", inputs.size(), "output size",
+            #   outputs.size())
             predicted = torch.argmax(outputs.data, 1)
             loss = criterion(outputs, labels)
             loss.backward()
@@ -58,37 +68,48 @@ def train_model(model,
         accuracies.append(epoch_acc)
 
         # switch the model to eval mode to evaluate on test data
-        '''
         model.eval()
         test_acc = eval_model(model, test_loader)
         test_accuracies.append(test_acc)
-        '''
 
         # re-set the model to train mode after validating
+
         model.train()
-        scheduler.step()
+        if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
+            scheduler.step(test_acc)
+        else:
+            scheduler.step()
         since = time.time()
+        save = {
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "scheduler": scheduler
+        }
+        torch.save(save,
+                   '{}.pth'.format(os.path.join("./model/", str(epoch + 1))))
     print('Finished Training')
 
     return model, losses, accuracies, test_accuracies
 
 
 def eval_model(model, test_loader):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     correct = 0.0
     total = 0.0
     with torch.no_grad():
         for i, data in enumerate(test_loader, 0):
             images, labels = data
-            #images = images.to(device).half() # uncomment for half precision model
-            images = images.to(model.device)
-            labels = labels.to(model.device)
+            images = images.to(device)
+            labels = labels.to(device)
 
             outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
+            predicted = torch.argmax(outputs.data, 1)
 
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-
+    # print(correct)
+    # print(total)
+    # print(correct / total)
     test_acc = 100.0 * correct / total
     print('Accuracy of the network on the test images: %d %%' % (test_acc))
 

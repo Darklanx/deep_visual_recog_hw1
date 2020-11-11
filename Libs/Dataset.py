@@ -7,19 +7,26 @@ import skimage.io as io
 import torchvision.transforms as transforms
 from PIL import Image
 import traceback
+import copy
+import random
 
 
 class Dataset(torch.utils.data.Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, dir, csv_file, label_ids=None, transform=None):
+    def __init__(self,
+                 dir,
+                 csv_file,
+                 label_ids=None,
+                 transform=None,
+                 eval=False):
 
         self.dir = dir
         self.data = sorted(
-            map(os.path.basename, glob.glob(os.path.join(self.dir,
-                                                         "*.jpg"))))[0:100]
+            map(os.path.basename, glob.glob(os.path.join(self.dir, "*.jpg"))))
         self.labels = pd.read_csv(csv_file)
         self.label_ids = label_ids
+        self.eval = eval
         self.transform = transform
 
     def __len__(self):
@@ -37,7 +44,7 @@ class Dataset(torch.utils.data.Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        if self.label_ids is not None:
+        if self.eval == False:
             try:
                 label = self.labels.loc[self.labels["id"] == int(
                     img_name)]["label"].values[0]
@@ -50,8 +57,15 @@ class Dataset(torch.utils.data.Dataset):
             # test
             return image, img_name
 
-    def get_label_id(self, label, idx):
-        pass
+    def train_test_split(self, train_ratio=0.9):
+        test_dataset = copy.deepcopy(self)
+        split_point = int(len(self.data) * train_ratio)
+        random_index = list(range(len(self.data)))
+        random.shuffle(random_index)
+        self.data = np.array(self.data)[random_index[:split_point]]
+        test_dataset.data = np.array(
+            test_dataset.data)[random_index[split_point:]]
+        return self, test_dataset
 
 
 '''
