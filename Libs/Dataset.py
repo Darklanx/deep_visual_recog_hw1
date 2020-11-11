@@ -3,7 +3,6 @@ import os
 import torch
 import numpy as np
 import glob
-import skimage.io as io
 import torchvision.transforms as transforms
 from PIL import Image
 import traceback

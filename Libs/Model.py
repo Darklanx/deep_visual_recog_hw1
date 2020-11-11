@@ -2,8 +2,8 @@ import torch
 import torchvision
 import torch.nn as nn
 import torchvision.models as models
-import skimage.io as io
 from torch.nn import Conv2d
+from resnest.torch import resnest50, resnest200
 
 
 class Net(nn.Module):
@@ -12,7 +12,8 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu")
-        self.model = models.resnet50(pretrained=True)
+        # self.model = models.resnet50(pretrained=True)
+        self.model = resnest200(pretrained=True)
         in_features = self.model.fc.in_features
         self.model = nn.Sequential(
             *list(self.model.children())[:-1])  # remove last fc
