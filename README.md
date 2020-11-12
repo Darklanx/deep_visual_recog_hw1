@@ -6,4 +6,5 @@ To reproduct my submission without retrainig, do the following steps:
 
 ## Installation resnest
 `pip3 install resnest --pre.`
+`pip3 install -r requirements.txt`
 
