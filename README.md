@@ -16,6 +16,6 @@ Modify variable
 ```
 dir_training = "./path-to-training-data-folder"
 dir_testing = "./path-to-testing-data-folder"
-csv_file = "./path-to-csv-label
+csv_file = "./path-to-csv-label"
 ```
 
