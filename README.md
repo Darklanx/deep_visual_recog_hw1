@@ -11,9 +11,11 @@ To reproduct my submission without retrainig, do the following steps:
 
 ## Dataset Preparation
 `kaggle competitions download -c cs-t0828-2020-hw1`
+
 Modify variable 
+```
 dir_training = "./path-to-training-data-folder"
 dir_testing = "./path-to-testing-data-folder"
 csv_file = "./path-to-csv-label
-
+```
 
