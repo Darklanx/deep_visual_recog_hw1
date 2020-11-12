@@ -31,8 +31,8 @@ def train_model(model,
         running_loss = 0.0
         running_correct = 0.0
         for i, data in enumerate(train_loader, 0):
-            if i % 30 == 0:
-                print(i)
+            # if i % 30 == 0:
+            # print(i)
 
             # get the inputs and assign them to cuda
             inputs, labels = data
