@@ -25,7 +25,8 @@ def train_model(model,
     model.train()
     for epoch in range(start_epoch, end_epoch):
         model.train()
-        print("Training epoch {} ...".format(epoch + 1))
+        print("Training epoch {} with lr {}...".format(
+            epoch + 1, optimizer.param_groups[0]['lr']))
         since = time.time()
         running_loss = 0.0
         running_correct = 0.0
@@ -35,10 +36,6 @@ def train_model(model,
 
             # get the inputs and assign them to cuda
             inputs, labels = data
-            # print(i)
-            # print(inputs.shape)
-            #inputs = inputs.to(device).half() # uncomment for half precision model
-
             inputs = inputs.to(device)
             labels = labels.to(device)
 
@@ -75,16 +72,19 @@ def train_model(model,
         # re-set the model to train mode after validating
 
         model.train()
+
         if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
             scheduler.step(test_acc)
         else:
             scheduler.step()
-        since = time.time()
         save = {
             "model": model.state_dict(),
             "optimizer": optimizer.state_dict(),
-            "scheduler": scheduler
+            "scheduler": scheduler,
+            "test_acc": test_acc
         }
+        since = time.time()
+
         torch.save(save,
                    '{}.pth'.format(os.path.join("./model/", str(epoch + 1))))
     print('Finished Training')

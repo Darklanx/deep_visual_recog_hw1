@@ -22,7 +22,8 @@ class Dataset(torch.utils.data.Dataset):
 
         self.dir = dir
         self.data = sorted(
-            map(os.path.basename, glob.glob(os.path.join(self.dir, "*.jpg"))))
+            map(os.path.basename, glob.glob(os.path.join(self.dir,
+                                                         "*.jpg"))))
         self.labels = pd.read_csv(csv_file)
         self.label_ids = label_ids
         self.eval = eval

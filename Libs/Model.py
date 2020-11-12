@@ -3,7 +3,7 @@ import torchvision
 import torch.nn as nn
 import torchvision.models as models
 from torch.nn import Conv2d
-from resnest.torch import resnest50, resnest200
+from resnest.torch import resnest50, resnest200, resnest101
 
 
 class Net(nn.Module):
